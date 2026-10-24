@@ -1,0 +1,5 @@
+# script output folders
+ad-enum-*/
+ade/
+*.out
+.DS_Store
