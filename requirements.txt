@@ -1,0 +1,38 @@
+# ad-enum.sh — Kali-side dependencies
+# =====================================================================
+# ad-enum.sh is a bash script that chains existing tools. Its requirements
+# are therefore a mix of Python packages (below), system packages (apt) and
+# one Go binary. On a stock Kali most of these are already present; this file
+# makes the set explicit and reproducible.
+#
+# Python tools:  pip install -r requirements.txt   (ideally inside a venv)
+# On Kali, installing the CLI tools with pipx avoids dependency clashes:
+#   pipx install netexec impacket certipy-ad bloodhound bloodyAD \
+#                enum4linux-ng ldapdomaindump
+# =====================================================================
+
+# --- pip-installable (Python) ----------------------------------------
+netexec           # 'nxc' — core LDAP/SMB/RPC enumeration (used the most)
+impacket          # impacket-GetNPUsers / GetUserSPNs / secretsdump / getST / mssqlclient / psexec
+certipy-ad        # 'certipy' / 'certipy-ad' — AD CS (ESC) enumeration
+bloodhound        # 'bloodhound-python' — SharpHound collector (needs a password, not -H)
+bloodyAD          # write-rights / MachineAccountQuota checks
+enum4linux-ng     # SMB / RPC sweep
+ldapdomaindump    # LDAP -> HTML report
+
+# --- NOT pip-installable: install separately -------------------------
+#
+# System packages (preinstalled on Kali; on Debian/others):
+#   sudo apt install -y nmap dnsutils smbclient samba-common-bin ldap-utils hashcat
+#     nmap              targeted scan of the DC service ports
+#     dnsutils          provides 'dig' (DNS / zone-transfer attempt)
+#     smbclient         share listing over SMB
+#     samba-common-bin  provides 'rpcclient' (RPC null-session sweep)
+#     ldap-utils        provides 'ldapsearch' (raw LDAP enumeration)
+#     hashcat           --crack (AS-REP / Kerberoast cracking)
+#   gpp-decrypt         ships with Kali (GPP cPassword decryption in SYSVOL)
+#
+# Go tool (not on PyPI / apt):
+#   kerbrute — Kerberos user enumeration / AS-REP roasting. Install with:
+#     go install github.com/ropnop/kerbrute@latest
+#   or download a release binary: https://github.com/ropnop/kerbrute/releases
