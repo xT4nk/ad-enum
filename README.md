@@ -43,6 +43,9 @@ but **no password**.
 
 Expects on `PATH`: `nxc`, impacket suite, `certipy`, `bloodhound-python`, `kerbrute`, `hashcat`.
 
+Install the dependencies with `pip install -r requirements.txt` (Python tools);
+the apt packages and the `kerbrute` Go binary are listed in that file too.
+
 ## `ade.ps1` — on a domain-joined Windows host
 
 ```powershell
