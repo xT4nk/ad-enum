@@ -36,6 +36,20 @@ $script:N_OK=0; $script:N_EMPTY=0; $script:N_FAIL=0
 function Say([string]$s,[string]$c='Gray'){ if(-not $Quiet){ Write-Host $s -ForegroundColor $c } }
 function Section([string]$s){ Say "`n[=== $s ===]" 'Cyan' }
 
+# startup banner: the "ADE" block wordmark in cyan.
+function Show-Banner {
+    if ($Quiet) { return }
+    Write-Host ''
+    Write-Host ' ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░' -ForegroundColor Cyan
+    Write-Host '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' -ForegroundColor Cyan
+    Write-Host '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' -ForegroundColor Cyan
+    Write-Host '░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░' -ForegroundColor Cyan
+    Write-Host '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' -ForegroundColor Cyan
+    Write-Host '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' -ForegroundColor Cyan
+    Write-Host '░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░' -ForegroundColor Cyan
+    Write-Host ''
+}
+
 # well-known GUIDs that turn an ExtendedRight ACE into something dangerous
 $G_ReplGet    = '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2'   # DS-Replication-Get-Changes
 $G_ReplGetAll = '1131f6ad-9c07-11d1-f79f-00c04fc2dcd2'   # ...-Get-Changes-All  (DCSync = both)
@@ -64,6 +78,7 @@ $script:MeName = $me.Name
 if (-not $OutDir) { $OutDir = Join-Path $env:TEMP ("ade-{0:yyyyMMdd-HHmmss}" -f (Get-Date)) }
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
+Show-Banner
 Section 'PRE-FLIGHT'
 Say ("[*] Running as : {0}" -f $MeName) 'Cyan'
 Say ("[*] Domain     : {0}" -f $DefaultNC) 'Cyan'

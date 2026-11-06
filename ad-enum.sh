@@ -79,6 +79,20 @@ done
 
 # ---------------------------------------------------------------- helpers ---
 section() { printf '\n%s[=== %s ===]%s\n' "$C_B$C_C" "$1" "$C_RST"; }
+
+# startup banner: the "ADE" block wordmark in cyan.
+banner() {
+    local wm="$C_B$C_C" r="$C_RST"
+    printf '\n'
+    printf '%s%s%s\n' "$wm" ' ░▒▓██████▓▒░░▒▓███████▓▒░░▒▓████████▓▒░' "$r"
+    printf '%s%s%s\n' "$wm" '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' "$r"
+    printf '%s%s%s\n' "$wm" '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' "$r"
+    printf '%s%s%s\n' "$wm" '░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓██████▓▒░' "$r"
+    printf '%s%s%s\n' "$wm" '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' "$r"
+    printf '%s%s%s\n' "$wm" '░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░' "$r"
+    printf '%s%s%s\n' "$wm" '░▒▓█▓▒░░▒▓█▓▒░▒▓███████▓▒░░▒▓████████▓▒░' "$r"
+    printf '\n'
+}
 info()    { printf '%s[*]%s %s\n' "$C_C" "$C_RST" "$1"; }
 ok()      { printf '%s[+]%s %s\n' "$C_G" "$C_RST" "$1"; }
 warn()    { printf '%s[!]%s %s\n' "$C_Y" "$C_RST" "$1"; }
@@ -210,6 +224,7 @@ ldap_query() {
 }
 
 # --------------------------------------------------------------- pre-flight ---
+banner
 section "PRE-FLIGHT"
 for t in nxc ldapsearch rpcclient nmap dig smbclient; do
     have "$t" || warn "missing: $t (related checks will be skipped and logged as SKIP)"
