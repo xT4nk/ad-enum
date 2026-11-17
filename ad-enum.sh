@@ -263,7 +263,9 @@ DC_FQDN="$DC_NAME.$DOMAIN"
 BASEDN="dc=$(sed 's/\./,dc=/g' <<<"$DOMAIN")"
 
 OUTDIR="${OUTDIR:-./ad-enum-${DOMAIN}-$(date +%Y%m%d-%H%M%S)}"
-mkdir -p "$OUTDIR"
+# the output holds credentials, cracked passwords (hashcat.pot) and AD dumps: keep it private to this user
+( umask 077; mkdir -p "$OUTDIR" )
+chmod 700 "$OUTDIR" 2>/dev/null || true
 # absolute from here on: some steps cd elsewhere (certipy, bloodhound) and a
 # relative $OUTDIR / $DNSFIX would then point at nothing.
 OUTDIR=$(cd "$OUTDIR" && pwd)
